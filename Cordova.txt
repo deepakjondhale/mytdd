@@ -1,0 +1,19 @@
+1. InstallNodejs
+2. Run Below Command
+npm install -g cordova
+3.Check Cordova Version
+cordova --version
+4. Run Below Command
+cordova create ./HelloWorld com.helloworld HelloWorld
+5. cordova platform add android
+6.Check Platform Names
+cordova platform ls
+7.Add Plugins - Listed as required.
+cordova plugin add plugin-name 
+
+org.apache.cordova.deviceorg.apache.cordova.network-information org.apache.cordova.battery-status org.apache.cordova.device-motion org.apache.cordova.device-orientation org.apache.cordova.geolocation org.apache.cordova.camera org.apache.cordova.media org.apache.cordova.media-capture org.apache.cordova.file org.apache.cordova.file-transfer org.apache.cordova.dialogs org.apache.cordova.vibration org.apache.cordova.contacts org.apache.cordova.globalization org.apache.cordova.splashscreen org.apache.cordova.inappbrowser org.apache.cordova.console
+8.cordova plugin list
+9.cordova plugin remove plugin-name
+10.cordova build
+11.cordova build android
+12.cordova emulate android
