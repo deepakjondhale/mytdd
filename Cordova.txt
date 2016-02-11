@@ -16,4 +16,20 @@ org.apache.cordova.deviceorg.apache.cordova.network-information org.apache.cordo
 9.cordova plugin remove plugin-name
 10.cordova build
 11.cordova build android
+If Getting Error For Gradle Zip
+Follow Below Steps:
+A.Go to gradle and Download Latest e.g. gradle-2.2.1-all.zip Version.
+B.Copy zip to Below Path:
+..\HelloWorld\platforms\android\gradle
+C.Change gradle-wrapper.properties inside 
+  ..\HelloWorld\platforms\android\gradle\wrapper\ 
+D.Update Distribution Url To:
+distributionUrl=../gradle-2.2.1-all.zip
+
+E.Go To Path
+..\HelloWorld\platforms\android\cordova\lib\build.js
+F. Search For distributionUrl at Line No#346 and Comment Old Entry For Distribution URL 
+  //var distributionUrl = 'distributionUrl=http://services.gradle.org/distributions/gradle-2.2.1-all.zip';
+G.Add Below Entry For Distribution URL
+var distributionUrl = 'distributionUrl=../gradle-2.2.1-all.zip';
 12.cordova emulate android
