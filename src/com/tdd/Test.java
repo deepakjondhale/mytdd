@@ -1,4 +1,4 @@
-package com.ideas;
+package com.tdd;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -15,7 +15,7 @@ public class Test {
 
 	public static void main(String[] args) {
 		String startDateArray[]={"2007-01-01","2007-01-01","2007-01-01","2007-03-01","2007-03-01","2007-03-01","2007-05-01","2007-05-01","2007-05-01","2007-07-01"};
-
+        System.out.println("Its Second Checkin");
 		//getCommonDates(startDateArray);
 		Locale locale;
 		locale=Locale.GERMAN;
