@@ -33,3 +33,7 @@ F. Search For distributionUrl at Line No#346 and Comment Old Entry For Distribut
 G.Add Below Entry For Distribution URL
 var distributionUrl = 'distributionUrl=../gradle-2.2.1-all.zip';
 12.cordova emulate android
+
+13.Install Latest Android Studio
+14.Import project into Android Studio till Path
+ ..\HelloWorld\platforms\android 
