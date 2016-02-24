@@ -107,6 +107,7 @@ class Airport implements Comparable<Airport>
 {
     public final String name;
     public Route[] adjacencies;
+
     public double minDistance = Double.POSITIVE_INFINITY;
     public Airport previous;
     public Airport(String argName) { name = argName; }
