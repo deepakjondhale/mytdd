@@ -1,75 +1,41 @@
 package djsolution;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class CalculateBasicRate {
     private String startDate;
     private String endDate;
-    private List<Double> spectrumList;
-    private List<Double> percentMultiplierList=Arrays.asList(11.2d,23.5d,36d,42d,35d,64d,73d);
+    private Map<DayOfWeek,List<Double>> spectrumList;
     private int lengthOfDays=1;
-    public CalculateBasicRate(String startDate, String endDate) {
+    private final Map<DayOfWeek,Double> percentMultiplierMap;
+    public CalculateBasicRate(String startDate, String endDate, Map<DayOfWeek, Double> percentMultiplierMap) {
         this.startDate=startDate;
         this.endDate=endDate;
+        this.percentMultiplierMap=percentMultiplierMap;
         if(endDate.contains("+")) {
             lengthOfDays= Integer.parseInt(endDate.split("\\+")[1])+1;
         }
     }
-    public enum DOW {
-        MONDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));
-                setPercentageMultiplier(percentMultiplier);
-            }
-        },TUESDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));
-                setPercentageMultiplier(percentMultiplier);
-            }
-        },WEDNESDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));     
-                setPercentageMultiplier(percentMultiplier);
-            }
-        },THURSDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));   
-                setPercentageMultiplier(percentMultiplier);
-            }
-        },FRIDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));
-                setPercentageMultiplier(percentMultiplier);
-            }
-        },SATURDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));  
-                setPercentageMultiplier(percentMultiplier);
-            }
-        },SUNDAY {
-            @Override
-            public void setSpectrumForDow(List<Double> spectrumList,Double percentMultiplier) {
-                setSpectrumAverage(calculateAverageSpectrum(spectrumList));
-                setPercentageMultiplier(percentMultiplier);
-            }
-        };
-        private double basicRate;
+   class DOW {
+        private String name;
+        public DOW(String name, Double percentMultiplier, List<Double> spectrumList) {
+            super();
+            this.percentMultiplier=percentMultiplier;
+            this.name = name;
+            this.spectrumAverage=calculateAverageSpectrum(spectrumList);
+        }
+        private Double basicRate;
         private double percentMultiplier;
         private Double spectrumAverage;
         
         public Double calculateAverageSpectrum(List<Double> spectrumList) {
-            Double spectrumAverage;
             if(spectrumList!=null) {
                 spectrumAverage=spectrumList.stream().reduce(0d, (a,e)->a+e)/spectrumList.size();
             }else {
@@ -77,30 +43,15 @@ public class CalculateBasicRate {
             }
             return spectrumAverage;
         }
-        public double getBasicRate() {
+        public Double getBasicRate() {
             calculateBasicRate();
             return basicRate;
-        }
-        public double getPercentageMultiplier() {
-            return percentMultiplier;
-        }
-        public void setPercentageMultiplier(double percentMultiplier) {
-            this.percentMultiplier=percentMultiplier;
-        }
-        public Double getSpectrumAverage() {
-            return spectrumAverage;
-        }
-        public void setSpectrumAverage(double spectrumAverage) {
-            this.spectrumAverage=spectrumAverage;
         }
         private void calculateBasicRate() {
             if(spectrumAverage!=null) {
                 basicRate = spectrumAverage * (percentMultiplier /100 ); 
             }
         }
-        public abstract void setSpectrumForDow(List<Double> spectrumList, Double double1);
-        
-        
     }
 
     public Map<String,Double> calculateRate() {
@@ -109,25 +60,49 @@ public class CalculateBasicRate {
         LocalDateTime date=LocalDateTime.now();
         for(int i=0;i<lengthOfDays;i++) {
             LocalDateTime plusDays = date.plusDays(i);
-            double basicRate = calculateBasicRateForDow(plusDays);
+            
+            Function<DayOfWeek,Double> calculateBasicRateForDow= dayOfWeek->{
+                List<Double> dowSpecificList=spectrumList.get(dayOfWeek);
+                DOW dow = new DOW(dayOfWeek.name(),percentMultiplierMap.get(dayOfWeek), dowSpecificList);
+                Double basicRate = dow.getBasicRate();
+                return basicRate;
+            };
+            Function<DayOfWeek,Double> memoizedCalculateBasicRateForDow =  memoizeCalculateBasicRateForDow(calculateBasicRateForDow);
+            
+            //Double basicRate = calculateBasicRateForDow(plusDays.getDayOfWeek());
+            Double basicRate = memoizedCalculateBasicRateForDow.apply(plusDays.getDayOfWeek());
             mapOfBasicRate.put(plusDays.format(formatter), basicRate);
         }
         return mapOfBasicRate;
-        
     }
-
-    private double calculateBasicRateForDow(LocalDateTime plusDays) {
-        DOW dow = DOW.valueOf(plusDays.getDayOfWeek().name());
-        dow.setSpectrumForDow(spectrumList,percentMultiplierList.get(dow.ordinal()));
-        double basicRate = dow.getBasicRate();
+    
+ private static <T, R> Function<T, R> memoizeCalculateBasicRateForDow(Function<T, R> fn) {
+        final Map<T,R> cache= new HashMap<>();
+        return t -> {
+            if(cache.containsKey(t)) {
+                return cache.get(t);
+            }
+            else {
+                R r= fn.apply(t);
+                cache.put(t,r);
+                return r;
+            }
+        };
+    }
+    
+    /*private Double calculateBasicRateForDow(DayOfWeek dayOfWeek) {
+        List<Double> dowSpecificList=spectrumList.get(dayOfWeek);
+        DOW dow = new DOW(dayOfWeek.name(),percentMultiplierMap.get(dayOfWeek), dowSpecificList);
+        Double basicRate = dow.getBasicRate();
         return basicRate;
-    }
-
-    public List<Double> getSpectrumList() {
-        return spectrumList;
-    }
-
-    public void setSpectrumList(List<Double> spectrumList) {
+    }*/
+     
+ 
+    public void setSpectrumList(Map<DayOfWeek, List<Double>> spectrumList) {
         this.spectrumList = spectrumList;
+    }
+
+    public Map<DayOfWeek, List<Double>> getSpectrumList() {
+        return spectrumList;
     }
 }
