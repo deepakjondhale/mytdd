@@ -1,17 +1,23 @@
-package com.tdd.shoppingcart;
+package com.tdd.shoppingcartWithInterfaces;
 
 import java.math.BigDecimal;
 
 public class Product {
     private BigDecimal price;
     private String productId;
-    public Product(String productId,BigDecimal bigDecimal) {
+    private Category category;
+    public Product(String productId,BigDecimal bigDecimal, Category category) {
         this.productId=productId;
-        price=bigDecimal;
+        this.price=bigDecimal;
+        this.category=category;
     }
 
     public BigDecimal getPrice() {
-        return price;
+        BigDecimal priceWithCategoryDiscounts=price;
+        if(category!=null) {
+            priceWithCategoryDiscounts =price.add(priceWithCategoryDiscounts.multiply(new BigDecimal(category.getDiscountPercent())));
+        }
+        return priceWithCategoryDiscounts;
     }
 
     @Override
